@@ -93,10 +93,16 @@ class WhereBracketExpressionBuilder implements Builder {
       return $builder->build($parsed);
     }
 
+    protected function buildSubQuery($parsed) {
+        $builder = new SubQueryBuilder();
+        return $builder->build($parsed);
+    }
+
     public function build(array $parsed) {
         if ($parsed['expr_type'] !== ExpressionType::BRACKET_EXPRESSION) {
             return "";
         }
+
         $sql = "";
         foreach ($parsed['sub_tree'] as $k => $v) {
             $len = strlen($sql);
@@ -109,7 +115,8 @@ class WhereBracketExpressionBuilder implements Builder {
             $sql .= $this->build($v);
             $sql .= $this->buildUserVariable($v);
             $sql .= $this->buildReserved($v);
-            
+            $sql .= $this->buildSubQuery($v);
+
             if ($len == strlen($sql)) {
                 throw new UnableToCreateSQLException('WHERE expression subtree', $k, $v, 'expr_type');
             }
